@@ -97,5 +97,4 @@ test('End to end transaction', async ({
     expect(accountId).toBe(newAccountNumber);
     expect(type).toBe(payBillData.transactionType);
     expect(amount).toBe(payBillData.amount);
-
 });
