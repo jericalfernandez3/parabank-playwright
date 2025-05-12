@@ -1,4 +1,4 @@
-// Test Data unique username
+// Test Data for unique username
 const now = new Date();
 export const generateUsernameData = {
   month: String(now.getMonth() + 1).padStart(2, '0'),
