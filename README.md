@@ -9,4 +9,5 @@ _Take note of the project's pre-requisite before running the automation locally_
 - [Java JDK 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 - [Jenkins](https://www.jenkins.io/download/)
 - Use the following command to install dotenv for safekeeping of senstive informations like credentials, api keys and endpoints
-```cmd npm install dotenv
+```cmd
+npm install dotenv
