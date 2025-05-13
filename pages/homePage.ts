@@ -2,47 +2,84 @@ import { Page, Locator, expect } from '@playwright/test';
 
 export class HomePage {
     readonly page: Page;
-    readonly $homePage: Locator
 
     constructor(pageForConstructor: Page) {
         this.page = pageForConstructor;
-        this.$homePage = this.page.getByTestId(
-            "home-page"
-        )
     }
 
+    // -- Locator variables
+    globalNavigationMenu(linkName: string): Locator {
+        return this.page.locator('#headerPanel').getByRole('link', { name: linkName });
+    }
+    genericTextLocator(headerText: string): Locator {
+        return this.page.getByText(headerText);
+    }
+    productsPageHeaderText = () => this.page.locator('//p[@class="page-title" and contains(text(), "Products")]');
+    locationPageHeaderText = () => this.page.locator('//div[@class="page_body"]//p[contains(text(), "Solutions")]');
+    administrationPageHeaderText = () => this.page.getByRole('heading', { name: 'Administration' });
+    homeButton = () => this.page.getByRole('link', { name: 'home' });
+    accountServicesButton(accountService: string): Locator {
+        return this.page.getByRole('link', { name: accountService });
+    }
+    savingsBankType = () => this.page.locator('#type').selectOption('1');
+    openNewAccountButton = () => this.page.getByRole('button', { name: 'Open New Account' });
+    newAccountNumber = () => this.page.locator('#newAccountId');
+    firstAccountNumber = () => this.page.locator('//table[@id="accountTable"]//td/a').first();
+    firstAccountNumberBalance = () => this.page.locator('//table[@id="accountTable"]//td').nth(1);
+    minimumAmountToOpenNewAccount = () => this.page.locator('//div[@id="openAccountForm"]//select[@id="type"]//following-sibling::p/b');
+    newAccountNumberBalance = () => this.page.locator('//table[@id="accountTable"]//td').nth(4);
+    fundTransferFromAccount = () => this.page.locator('#fromAccountId');
+    fundTransferToAccount = () => this.page.locator('#toAccountId');
+    fundTransferAmount = () => this.page.locator('#amount');
+    fundTransferButton = () => this.page.getByRole('button', { name: 'Transfer' })
+    fundTransferSuccessMessage = () => this.page.locator('//div[@id="showResult"]/p');
+    payeeName = () => this.page.locator('input[name="payee\\.name"]');
+    payeeAddress = () => this.page.locator('input[name="payee\\.address\\.street"]');
+    payeeCity = () => this.page.locator('input[name="payee\\.address\\.city"]');
+    payeeState = () => this.page.locator('input[name="payee\\.address\\.state"]');
+    payeeZipCode = () => this.page.locator('input[name="payee\\.address\\.zipCode"]');
+    payeePhoneNumber = () => this.page.locator('input[name="payee\\.phoneNumber"]');
+    payeeAccountNumber = () => this.page.locator('input[name="payee\\.accountNumber"]');
+    payeeVerifyAccountNumber = () => this.page.locator('input[name="verifyAccount"]');
+    payBillsAmount = () => this.page.locator('input[name="amount"]');
+    billsPayFromAccount = () => this.page.locator('select[name="fromAccountId"]');
+    sendPaymentButton = () => this.page.getByRole('button', { name: 'Send Payment' });
+    billsPaymentSuccessMessageHeader = () => this.page.getByRole('heading', { name: 'Bill Payment Complete' });
+    billsPaymentSuccessMessage = () => this.page.locator('//div[@id="billpayResult"]/p');
+
+    // -- Methods
     async verifyAboutUsPage() {
-        await this.page.locator('#headerPanel').getByRole('link', { name: 'About Us' }).click();
+        await this.globalNavigationMenu('About Us').click();
         await expect(this.page).toHaveTitle("ParaBank | About Us");
-        await expect(this.page.getByText('For more information about')).toBeVisible();
+        await expect(this.genericTextLocator('For more information about')).toBeVisible();
     }
 
     async verifyServicesPage() {
-        await this.page.locator('#headerPanel').getByRole('link', { name: 'Services' }).click();
+        await this.globalNavigationMenu('Services').click();
         await expect(this.page).toHaveTitle("ParaBank | Services");
-        await expect(this.page.getByText('Available Bookstore SOAP')).toBeVisible();
+        await expect(this.genericTextLocator('Available Bookstore SOAP')).toBeVisible();
     }
 
     async verifyProductsPage() {
-        await this.page.locator('#headerPanel').getByRole('link', { name: 'Products' }).click();
+        await this.globalNavigationMenu('Products').click();
         await expect(this.page).toHaveTitle("Automated Software Testing Tools - Ensure Quality - Parasoft");
-        await expect(this.page.locator('//p[@class="page-title" and contains(text(), "Products")]')).toBeVisible();
+        await expect(this.productsPageHeaderText()).toBeVisible();
     }
 
     async verifyLocationsPage() {
-        await this.page.locator('#headerPanel').getByRole('link', { name: 'Locations' }).click();
+        await this.globalNavigationMenu('Locations').click();
         await expect(this.page).toHaveTitle("Automated Software Testing Solutions For Every Testing Need");
-        await expect(this.page.locator('//div[@class="page_body"]//p[contains(text(), "Solutions")]')).toBeVisible();
+        await expect(this.locationPageHeaderText()).toBeVisible();
     }
 
     async verifyAdministrationPage() {
-        await this.page.getByRole('link', { name: 'Admin Page' }).click();
+        await this.globalNavigationMenu('Admin Page').click();
         await expect(this.page).toHaveTitle("ParaBank | Administration");
-        await this.page.getByRole('heading', { name: 'Administration' }).click();
+        await expect(this.administrationPageHeaderText()).toBeVisible();
     }
 
     async verifyGlobalNavigationPage() {
-        await this.page.getByRole('link', { name: 'home', exact: true }).click();
+        await this.homeButton().first().click();
         // Verify About Us page
         await this.verifyAboutUsPage();
         // Verify Services page
@@ -58,108 +95,108 @@ export class HomePage {
     }
 
     async navigateToAnyAccountService(accountService: string) {
-        await this.page.getByRole('link', { name: accountService }).click();
+        await this.accountServicesButton(accountService).click();
         await this.page.waitForResponse((response) => response.url().includes('accounts') && response.status() === 200, { timeout: 10000 });
     }
 
     async createBankAccount() {
         // Get the first account number
-        await this.page.locator('#type').selectOption('1');
-        await this.page.getByRole('button', { name: 'Open New Account' }).click();
+        await this.savingsBankType();
+        await this.openNewAccountButton().click();
         // Validate if the user is able to create a new account successfully
-        await expect(this.page.getByText('Congratulations, your account')).toBeVisible();
-        await expect(this.page.getByText('Your new account number:')).toBeVisible();
+        await expect(this.genericTextLocator('Congratulations, your account')).toBeVisible();
+        await expect(this.genericTextLocator('Your new account number:')).toBeVisible();
         // Get the new account number
-        const newAccountNumber = (await this.page.locator('#newAccountId').textContent() || '').trim();
+        const newAccountNumber = (await this.newAccountNumber().textContent() || '').trim();
         // Return new account number    
         return newAccountNumber;
     }
 
     async getFirstAccountNumber() {
-        const firstAccountNumber = (await this.page.locator('//table[@id="accountTable"]//td/a').first().textContent() || '').trim();
+        const firstAccountNumber = (await this.firstAccountNumber().textContent() || '').trim();
         return firstAccountNumber;
     }
 
     async getFirstAccountNumberBalance() {
-        const rawBalance = (await this.page.locator('//table[@id="accountTable"]//td').nth(1).textContent())?.trim();
+        const rawBalance = (await this.firstAccountNumberBalance().textContent())?.trim();
         const balance = parseFloat(rawBalance?.replace('$', '').replace(',', '') || '0');
         return balance;
     }
 
     async getMinimumAmountToOpenNewAccount() {
-        const rawMinimumAmount = (await this.page.locator('//div[@id="openAccountForm"]//select[@id="type"]//following-sibling::p/b').textContent()|| '').trim();
+        const rawMinimumAmount = (await this.minimumAmountToOpenNewAccount().textContent()|| '').trim();
         const match = rawMinimumAmount.match(/\$([\d,.]+)/);    // This regex will look for a dollar sign followed by digits
         const minimumAmount = match ? parseFloat(match[1].replace(',', '')) : 0;
         return minimumAmount;
     }
 
     async getNewAccountNumberBalance() {
-        const rawBalance = (await this.page.locator('//table[@id="accountTable"]//td').nth(4).textContent())?.trim();
+        const rawBalance = (await this.newAccountNumberBalance().textContent())?.trim();
         const balance = parseFloat(rawBalance?.replace('$', '').replace(',', '') || '0');
         return balance;
     }
 
     async selectTransferFundFromAccount(fromAccount: string) {
-        await this.page.locator('#fromAccountId').selectOption(fromAccount);
+        await this.fundTransferFromAccount().selectOption(fromAccount);
     }
 
     async selectTransferFundToAccount(toAccount: string) {
-        await this.page.locator('#toAccountId').selectOption(toAccount);
+        await this.fundTransferToAccount().selectOption(toAccount);
     }
 
     async enterTransferFundsAmount(amount: string) {
-        await this.page.locator('#amount').fill(amount);
+        await this.fundTransferAmount().fill(amount);
     }
 
     async transactFundTransfer(fromAccount: string, toAccount: string, amount: string) {
-        await this.navigateToAnyAccountService('Transfer Funds')
+        await this.accountServicesButton('Transfer Funds').click();
         await this.selectTransferFundFromAccount(fromAccount)
         await this.selectTransferFundToAccount(toAccount)
-        await this.enterTransferFundsAmount(amount)
-        await this.page.getByRole('button', { name: 'Transfer' }).click();
+        await this.fundTransferAmount().fill(amount);
+        await this.fundTransferButton().click();
         // Validate Successful Fund Transfer
-        await expect(this.page.getByRole('heading', { name: 'Transfer Complete!' })).toBeVisible();
-        await expect(this.page.locator('//div[@id="showResult"]/p').first()).toHaveText('$' + amount + '.00  has been transferred from account #' + fromAccount + ' to account #' + toAccount + '.');
+        await expect(this.genericTextLocator('Transfer Complete!')).toBeVisible();
+        await expect(this.fundTransferSuccessMessage().first()).toHaveText('$' + amount + '.00  has been transferred from account #' + fromAccount + ' to account #' + toAccount + '.');
     }
 
     async enterPayeeName(payeeName: string) {
-        await this.page.locator('input[name="payee\\.name"]').fill(payeeName);
+        await this.payeeName().fill(payeeName);
     }
 
     async enterPayeeAddress(address: string) {
-        await this.page.locator('input[name="payee\\.address\\.street"]').fill(address);
+        await this.payeeAddress().fill(address);
     }
 
     async enterPayeeCity(city: string) {
-        await this.page.locator('input[name="payee\\.address\\.city"]').fill(city);
+        await this.payeeCity().fill(city);
     }
 
     async enterPayeeState(state: string) {
-        await this.page.locator('input[name="payee\\.address\\.state"]').fill(state);
+        await this.payeeState().fill(state);
     }
 
     async enterPayeeZipCode(zipCode: string) {
-        await this.page.locator('input[name="payee\\.address\\.zipCode"]').fill(zipCode);
+        await this.payeeZipCode().fill(zipCode);
     }
     
     async enterPayeePhoneNumber(phoneNumber: string) {
-        await this.page.locator('input[name="payee\\.phoneNumber"]').fill(phoneNumber);
+        await this.payeePhoneNumber().fill(phoneNumber);
     }
 
     async enterPayeeAccountNumber(accountNumber: string) {
-        await this.page.locator('input[name="payee\\.accountNumber"]').fill(accountNumber);
+        await this.payeeAccountNumber().fill(accountNumber);
     }
 
     async enterPayeeAccountVerifyNumber(verifyAccountNumber: string) {
-        await this.page.locator('input[name="verifyAccount"]').fill(verifyAccountNumber);
+        await this.payeeVerifyAccountNumber().fill(verifyAccountNumber);
     }
 
     async enterPayBillsAmount(amount: string) {
-        await this.page.locator('input[name="amount"]').fill(amount);
+        await this.payBillsAmount().fill(amount);
     }
 
     async selectBillsPayFromAccount(accountNumber: string) {
-        await this.page.locator('select[name="fromAccountId"]').selectOption(accountNumber);
+        await this.billsPayFromAccount().selectOption(accountNumber);
     }
 
     async transactPayBills(payeeName: string, address: string, city: string, state: string, zipCode: string, phoneNumber: string, toAccountNumber: string, amount: string, fromAccountNumber: string) {
@@ -175,19 +212,19 @@ export class HomePage {
         await this.enterPayBillsAmount(amount);
         await this.selectBillsPayFromAccount(fromAccountNumber);
 
-        const headingLocator = this.page.getByRole('heading', { name: 'Bill Payment Complete' });
+        const headingLocator = this.billsPaymentSuccessMessageHeader();
         for (let i = 0; i < 5; i++) { // Retry up to 5 times (~1 second interval)
             const count = await headingLocator.count();
             if (count === 1) {
               break;
             }
-            await this.page.getByRole('button', { name: 'Send Payment' }).click();
+            await this.sendPaymentButton().click();
             await this.page.waitForTimeout(3000); // Wait 1 second before next click
           }
 
         // Validate Successful Bill Payment
-        await expect(this.page.getByRole('heading', { name: 'Bill Payment Complete' })).toBeVisible();
-        const confirmationText = (await this.page.locator('//div[@id="billpayResult"]/p').first().textContent())?.trim();
+        await expect(this.billsPaymentSuccessMessageHeader()).toBeVisible();
+        const confirmationText = (await this.billsPaymentSuccessMessage().first().textContent())?.trim();
         expect(confirmationText).toBe(`Bill Payment to ${payeeName} in the amount of $${amount}.00 from account ${fromAccountNumber} was successful.`);
     }
 
