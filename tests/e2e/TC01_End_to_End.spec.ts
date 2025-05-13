@@ -35,13 +35,18 @@ test('End to end transaction', async ({
     const firstAccountPreviousBalance: number = await homePage.getFirstAccountNumberBalance()
     const firstAccountNumber = await homePage.getFirstAccountNumber()
 
+    // Navigate to 'Open New Account' page
+    await homePage.navigateToAnyAccountService('Open New Account')
+    // Get the minimum amount to open a new account
+    const minimumAmountToOpenNewAccount: number = await homePage.getMinimumAmountToOpenNewAccount()
+    
     // 3. Create a new bank account (second account number)
     const newAccountNumber = await homePage.createBankAccount()
 
     // 4. Validate the previous and current balance of first account number
     await homePage.navigateToAnyAccountService('Accounts Overview')
     const firstAccountCurrentBalance: number = await homePage.getFirstAccountNumberBalance()    // -- current balance from UI
-    const expectedFirstAccountCurrentBalance: number = firstAccountPreviousBalance - 100;       // -- expected balance after creating new account
+    const expectedFirstAccountCurrentBalance: number = firstAccountPreviousBalance - minimumAmountToOpenNewAccount;       // -- expected balance after creating new account
     expect(expectedFirstAccountCurrentBalance).toBe(firstAccountCurrentBalance)
 
     // Validate the second account number balance

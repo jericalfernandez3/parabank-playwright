@@ -63,9 +63,6 @@ export class HomePage {
     }
 
     async createBankAccount() {
-        await this.page.getByRole('link', { name: 'Open New Account' }).click();
-        // Wait for the accounts api response to return status code 200
-        await this.page.waitForResponse((response) => response.url().includes('accounts') && response.status() === 200, { timeout: 10000 });
         // Get the first account number
         await this.page.locator('#type').selectOption('1');
         await this.page.getByRole('button', { name: 'Open New Account' }).click();
@@ -87,6 +84,13 @@ export class HomePage {
         const rawBalance = (await this.page.locator('//table[@id="accountTable"]//td').nth(1).textContent())?.trim();
         const balance = parseFloat(rawBalance?.replace('$', '').replace(',', '') || '0');
         return balance;
+    }
+
+    async getMinimumAmountToOpenNewAccount() {
+        const rawMinimumAmount = (await this.page.locator('//div[@id="openAccountForm"]//select[@id="type"]//following-sibling::p/b').textContent()|| '').trim();
+        const match = rawMinimumAmount.match(/\$([\d,.]+)/);    // This regex will look for a dollar sign followed by digits
+        const minimumAmount = match ? parseFloat(match[1].replace(',', '')) : 0;
+        return minimumAmount;
     }
 
     async getNewAccountNumberBalance() {
