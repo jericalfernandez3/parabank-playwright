@@ -11,17 +11,16 @@ _Take note of the project's pre-requisite before running the automation locally_
 - Use the following command to install dotenv for safekeeping of senstive informations like credentials, api keys and endpoints
 ```cmd
 npm install dotenv
-
+```
 - Make sure to ask a copy of .env file from author and copy it inside the cloned project folder
 - Make sure to clone the project repository in this file path
 
 ```cmd
 C:\dev
-
+```
 ![alt text](image.png)
 
 ## Author
-
 Jeric Al P. Fernandez  
 📧 fernandez.jerical3@gmail.com  
 📱 +63 995 387 9865  
